@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../Context/AuthConetxt";
-import styles from "../Styles/Home.module.css";
+import styles from "../Styles/DashBoard.module.css";
 import cloud from "../assets/2.png";
 
 const hives = [
@@ -63,34 +63,6 @@ const Home = () => {
         <img src={cloud} alt="Cloud" className={styles.cloudImage} />
       </div>
       <div className={styles.dashboardContainer}>
-        <div className={styles.leftPanel}>
-          <div className={styles.weatherCard}>
-            <h1 className={styles.headingField}>Current Weather</h1>
-            {error && <p className={styles.errorMessage}>{error}</p>}
-            {weather ? (
-              <>
-                <img
-                  src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`}
-                  alt={weather.climate}
-                  className={styles.weatherIcon}
-                />
-                <div className={styles.infoBox}>
-                  🌡️ Temperature: {weather.temp}°C
-                </div>
-                <div className={styles.infoBox}>
-                  💧 Humidity: {weather.humidity}%
-                </div>
-                <div className={styles.infoBox}>
-                  ☁️ Climate: {weather.climate}
-                </div>
-              </>
-            ) : (
-              !error && (
-                <p className={styles.errorMessage}>Fetching weather...</p>
-              )
-            )}
-          </div>
-        </div>
         <div className={styles.rightPanel}>
           {hives.map((hive) => (
             <div key={hive.id} className={styles.hiveCard}>
