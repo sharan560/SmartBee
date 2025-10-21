@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../Context/AuthConetxt";
+import { AuthContext } from "../Context/AuthConetxt"; 
 import styles from "../Styles/DashBoard.module.css";
-import cloud from "../assets/2.png";
+import sunny from "../assets/1.png"; 
+import rain from "../assets/2.png";
+import cloudy from "../assets/4.png";
+import clear from "../assets/3.png";
 
 const hives = [
   { id: 1, temp: 35, humidity: 70, ph: 6.8, weight: 20, live: true },
@@ -18,12 +21,22 @@ const Home = () => {
   const [error, setError] = useState(null);
   const API_KEY = "8e88a178b6f8d7c81283a7bf200969fa";
 
+  const getImage = (climate) => {
+    const c = climate?.toLowerCase() || "";
+    if (/rain|drizzle/i.test(c)) return rain;
+    if (/cloud/i.test(c)) return cloudy;
+    if (/clear/i.test(c)) return clear;
+    if (/haze|fog|mist/i.test(c)) return cloudy; 
+    return sunny; 
+  };
+
   useEffect(() => {
     if (!loading && !user) {
       navigate("/");
     }
   }, [loading, user, navigate]);
 
+ 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -55,13 +68,41 @@ const Home = () => {
     }
   }, []);
 
-  if (loading) return null;
+  const handleHeaterToggle = (id) => {
+    console.log(`Toggle heater for Hive ${id}`);
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <>
-      <div className={styles.cloudImage}>
-        <img src={cloud} alt="Cloud" className={styles.cloudImage} />
-      </div>
+        {weather && (
+          <div className={styles.cloudImage} style={{ position: "relative" }}>
+            <img
+              src={getImage(weather.climate)}
+              alt="Weather Icon"
+              className={styles.cloudImage}
+            />
+              <div className={styles.weatherRightPanel}>
+              <div className={styles.weatherCardItem}>
+                <p>🌡️ Temp</p>
+                <h3>{weather.temp}°C</h3>
+              </div>
+              <div className={styles.weatherCardItem}>
+                <p>💧 Humidity</p>
+                <h3>{weather.humidity}%</h3>
+              </div>
+              <div className={styles.weatherCardItem}>
+                <p>🌤️ Climate</p>
+                <h3>{weather.climate}</h3>
+              </div>
+            </div>
+
+            </div>
+        )}
+
+
       <div className={styles.dashboardContainer}>
         <div className={styles.rightPanel}>
           {hives.map((hive) => (
@@ -77,7 +118,12 @@ const Home = () => {
               <p>🧪 pH: {hive.ph}</p>
               <p>⚖️ Weight: {hive.weight}kg</p>
               <p>Status: {hive.live ? "Live" : "Not Live"}</p>
-              <button className={styles.detailsButton}>Turn On Hive Heater</button>
+              <button
+                className={styles.detailsButton}
+                onClick={() => handleHeaterToggle(hive.id)}
+              >
+                Turn On Hive Heater
+              </button>
             </div>
           ))}
         </div>
