@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from './Navbar'
 import { motion } from 'framer-motion'
+import axios from 'axios'
 
 const API_KEY = "8e88a178b6f8d7c81283a7bf200969fa"
-
-const initialHives = [
-  { id: 1, temp: 35, humidity: 70, ph: 6.8, weight: 20, live: true },
-  { id: 2, temp: 34, humidity: 65, ph: 6.5, weight: 18, live: false },
-  { id: 3, temp: 36, humidity: 72, ph: 7.0, weight: 22, live: false },
-  { id: 4, temp: 35, humidity: 70, ph: 6.8, weight: 20, live: true },
-]
 
 const weatherFor = (key) => {
   const k = (key || '').toLowerCase()
@@ -20,16 +14,20 @@ const weatherFor = (key) => {
 }
 
 const Dborad = () => {
-  const [hives, setHives] = useState(initialHives)
+  const [hives, setHives] = useState([])
   const [heaters, setHeaters] = useState({})
   const [weather, setWeather] = useState({ temp: 25, humidity: 60, pressure: 1013, wind: 0, climate: 'Sunny' })
   const [time, setTime] = useState(new Date())
+
+
+    const farmId = localStorage.getItem('farmId')
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
 
+  // Fetch local weather
   const fetchWeather = async () => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -39,8 +37,6 @@ const Dborad = () => {
         const res = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
         )
-
-        console.log(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
         const data = await res.json()
         setWeather({
           temp: Math.round(data.main.temp),
@@ -55,33 +51,49 @@ const Dborad = () => {
     })
   }
 
+  const sendApiKey = async (farmId, apiKey) => {
+  try {
+    const res = await axios.post('http://localhost:5000/api/saveKey', {
+      farmId,
+      apiKey,
+    });
+    alert('API key saved successfully!');
+    console.log(res.data);
+  } catch (err) {
+    console.error(err);
+    alert('Error saving API key');
+  }
+};
+
+  // Fetch hive data from backend (ThingSpeak)
+  const fetchHives = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/thingspeak/latest?farmId=${farmId}`)
+      const data = await res.json()
+      setHives(data)
+    } catch (err) {
+      console.error("Error fetching hive data:", err)
+    }
+  }
+
+  useEffect(() => {
+    fetchWeather()
+    fetchHives()
+    const id = setInterval(() => fetchHives(), 10000) // update every 10s
+    return () => clearInterval(id)
+  }, [])
+
   const toggleHeater = (id) => {
     setHeaters((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
-
-  useEffect(() => {
-    fetchWeather()
-    const id = setInterval(() => randomizeHiveMetrics(), 8000)
-    return () => clearInterval(id)
-  }, [])
-
   const addHive = () => {
-  const newId = hives.length + 1
-  const newHive = {
-    id: newId,
-    temp: 0,
-    humidity: 0,
-    ph: 0,
-    weight: 0,
-    live: false,
+    const newId = hives.length + 1
+    const newHive = { id: newId, temp: 0, humidity: 0, ph: 0, weight: 0, live: false }
+    setHives((prev) => [...prev, newHive])
   }
-  setHives((prev) => [...prev, newHive])
-}
 
-
-  // Care attention calculation
-  const avgPh = hives.reduce((s, h) => s + h.ph, 0) / hives.length
+  const avgPh = hives.reduce((s, h) => s + h.ph, 0) / (hives.length || 1)
   const idealTemp = 35
   const idealHumidity = 65
   const tempScore = Math.min(100, Math.abs((weather.temp - idealTemp) / 10) * 100)
@@ -125,7 +137,6 @@ const Dborad = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#689f38' }}>
       <Navbar />
-
       <main className="mt-20 max-w-7xl mx-auto px-6 py-8 text-[#f0f4c3]">
         {/* Header */}
         <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
@@ -134,12 +145,20 @@ const Dborad = () => {
             <p className="text-sm text-[#f0f4c3]/80">Overview of hive health and local weather</p>
           </div>
           <div className="flex items-center gap-3">
+            <p>Farm ID: {localStorage.getItem('farmId')}</p>
+           <div className="flex items-center gap-3">
             <button
-              onClick={fetchWeather}
+              onClick={() => {
+                const apiKey = prompt('Enter your API key:');
+                if (!apiKey) return; // do nothing if canceled
+                const farmId = localStorage.getItem('farmId');
+                sendApiKey(farmId, apiKey);
+              }}
               className="bg-[#f0f4c3] text-[#33691e] px-4 py-2 rounded-lg shadow hover:scale-105 transition-transform font-semibold"
             >
-              Refresh Weather
+              Update key
             </button>
+          </div>
             <button
               onClick={addHive}
               className="bg-[#33691e] text-[#f0f4c3] px-4 py-2 rounded-lg shadow hover:bg-[#2e7d32] transition-transform"
@@ -149,7 +168,7 @@ const Dborad = () => {
           </div>
         </header>
 
-        {/* Weather + Gauge Section */}
+
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <motion.div
             className="col-span-1 bg-[#f0f4c3] text-[#33691e] rounded-3xl shadow-lg p-6 border border-[#cddc39]"
@@ -182,7 +201,6 @@ const Dborad = () => {
             </div>
           </motion.div>
 
-          {/* Gauge */}
           <motion.div
             className="col-span-1 md:col-span-2 bg-[#f0f4c3] text-[#33691e] rounded-3xl shadow-lg p-6 flex items-center justify-center border border-[#cddc39]"
             whileHover={{ scale: 1.01 }}
@@ -263,3 +281,6 @@ const Dborad = () => {
 }
 
 export default Dborad
+
+
+

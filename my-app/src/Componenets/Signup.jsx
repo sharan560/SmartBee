@@ -3,23 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Navbar from './Navbar'
 import honey from '../assets/honey.jpg'
-
-const mockSignUp = (formData) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (
-        formData.email.includes('@') &&
-        formData.password.length >= 6 &&
-        formData.name &&
-        formData.farmName
-      ) {
-        resolve({ token: 'fake-signup-token', user: formData })
-      } else {
-        reject(new Error('Please fill all required fields correctly'))
-      }
-    }, 700)
-  })
-}
+import axios from 'axios'
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -42,11 +26,24 @@ const Signup = () => {
     e.preventDefault()
     setError('')
     setLoading(true)
+
+    if(form.password.length < 6){
+      setError('Password must be at least 6 characters long')
+      setLoading(false)
+      return
+    }
+
     try {
-      await mockSignUp(form)
-      navigate('/') 
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/signup', // Backend endpoint
+        form
+      )
+      console.log(response.data) // Optional: log success message
+      localStorage.setItem('farmId', response.data.farmId)
+      navigate('/') // Redirect after signup
     } catch (err) {
-      setError(err.message)
+      console.error(err)
+      setError(err.response?.data?.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
@@ -54,8 +51,8 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen">
-    <div className="z-10">
-      <Navbar />
+      <div className="z-10">
+        <Navbar />
       </div>
 
       <main className="flex flex-col justify-center items-center max-w-6xl mx-auto px-6 py-12 mt-20">
@@ -66,13 +63,8 @@ const Signup = () => {
           transition={{ duration: 0.6 }}
           className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-xl p-6 md:p-10 flex flex-col md:flex-row items-center gap-8 w-full"
         >
-
           <div className="flex-shrink-0 text-center md:text-left">
-            <img
-              src={honey}
-              alt="Signup"
-              className="w-[500px] h-[500px]"
-            />
+            <img src={honey} alt="Signup" className="w-[500px] h-[500px]" />
           </div>
 
           <div className="w-full flex flex-col justify-center">
@@ -98,7 +90,7 @@ const Signup = () => {
                 <span className="text-sm text-[#f0f4c3]">Farm Name</span>
                 <input
                   type="text"
-                  name="GoodWells Farm"
+                  name="farmName"
                   value={form.farmName}
                   onChange={handleChange}
                   placeholder="Your farm name"

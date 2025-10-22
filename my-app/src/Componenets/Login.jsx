@@ -7,14 +7,12 @@ import honey from '../assets/honey.jpg'
 const mockSignIn = (email, password) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (email.includes('@') && password.length >= 6) {
+      if (email.includes('@')) {
         resolve({ token: 'fake-token', user: { email } })
       } else {
         if (!email.includes('@')) {
           reject(new Error('Invalid email format'))
-        } else {
-          reject(new Error('Password must be at least 6 characters'))
-        }
+        } 
       }
     }, 700)
   })
