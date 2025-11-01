@@ -1,14 +1,19 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+
 const connectDB = async () => {
+  const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/smartbee';
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
+    console.log('Connecting to MongoDB at', uri);
+    const conn = await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1); 
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message || err);
+    // exit so deployment fails loudly (Render will retry)
+    process.exit(1);
   }
 };
 
