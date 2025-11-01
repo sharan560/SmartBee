@@ -15,7 +15,10 @@ const registerUser = async (req, res) => {
 
     // Generate numeric farmId: get max existing farmId and add 1
     const maxFarm = await User.findOne().sort({ farmId: -1 }).exec();
-    const farmId = maxFarm ? maxFarm.farmId + 1 : 1; // start from 1 if no users
+    let farmId = maxFarm ? maxFarm.farmId + 1 : 1; // start from 1 if no users
+
+    farmId = Number(farmId);
+    console.log("Generated farmId:", farmId);
 
     // Create user
     const newUser = new User({
@@ -43,15 +46,26 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find user
+    console.log("🟡 Login attempt for:", email);
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid email or password" });
+    if (!user) {
+      console.log("❌ No user found with that email");
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
 
-    // Compare password
+    console.log("✅ User found:", user.email);
+    console.log("🔒 Stored hash:", user.password);
+
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
+    console.log("🔍 bcrypt.compare result:", isMatch);
 
-    // Return user info without password
+    if (!isMatch) {
+      console.log("❌ Password mismatch");
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    console.log("✅ Password matched!");
     res.status(200).json({
       message: "Login successful",
       user: {
@@ -61,12 +75,12 @@ const loginUser = async (req, res) => {
         phoneNumber: user.phoneNumber,
         address: user.address,
         farmName: user.farmName,
-        farmId: user.farmId // Include farmId
+        farmId: user.farmId
       }
     });
   } catch (err) {
+    console.error("🔥 Error during login:", err);
     res.status(500).json({ message: err.message });
   }
 };
-
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser }; 

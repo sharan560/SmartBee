@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Navbar from './Navbar'
 import honey from '../assets/honey.jpg'
+import axios from 'axios'
 
 const mockSignIn = (email, password) => {
   return new Promise((resolve, reject) => {
@@ -26,22 +27,32 @@ const Login = () => {
   const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!email) return setError('Please enter your email')
-    if (!password) return setError('Please enter your password')
+  e.preventDefault()
+  setError('')
+  if (!email) return setError('Please enter your email')
+  if (!password) return setError('Please enter your password')
 
-    setLoading(true)
-    try {
-      const res = await mockSignIn(email, password)
-      localStorage.setItem('sb_token', res.token)
-      navigate('/')
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+  setLoading(true)
+  try {
+    const res = await axios.post('http://localhost:5000/api/auth/login', {
+      email,
+      password,
+    })
+
+    // Save user info in localStorage
+    localStorage.setItem('user', JSON.stringify(res.data.user))
+    console.log(res.data)
+    navigate('/dashboard')
+  } catch (err) {
+    if (err.response && err.response.data) {
+      setError(err.response.data.message)
+    } else {
+      setError('Login failed. Please try again.')
     }
+  } finally {
+    setLoading(false)
   }
+}
 
   // Motion variants for the card
   const cardVariants = {

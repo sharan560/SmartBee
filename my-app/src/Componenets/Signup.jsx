@@ -35,12 +35,13 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/auth/signup', // Backend endpoint
+        'http://localhost:5000/api/auth/signup', 
         form
       )
-      console.log(response.data) // Optional: log success message
+      console.log(response.data) 
+      localStorage.setItem('user', JSON.stringify(response.data))
       localStorage.setItem('farmId', response.data.farmId)
-      navigate('/') // Redirect after signup
+      navigate('/dashboard') 
     } catch (err) {
       console.error(err)
       setError(err.response?.data?.message || 'Something went wrong')

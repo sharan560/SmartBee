@@ -2,6 +2,11 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const Navbar = () => {
+  const logout = () => {
+    localStorage.removeItem('user');
+    window.location.href = '/';
+  }
+  const loggedIn = !!localStorage.getItem('user');
   return (
     <header>
       <div
@@ -42,9 +47,18 @@ const Navbar = () => {
         <nav style={{ color: '#33691e' }} className="flex space-x-4 gap-5 font-semibold p-6 " aria-label="Main navigation">
           <Link className="hover:underline" to="/">Home</Link>
           <Link className="hover:underline" to="/contact">Contact</Link>
-          <Link className="hover:underline" to="/dashboard">DashBoard</Link>
-          <Link className="hover:underline" to="/login">Login</Link>
-          <Link className="hover:underline" to="/signup">Signup</Link>
+          
+          {loggedIn ? (
+            <>
+              <Link className="hover:underline" to="/dashboard">DashBoard</Link>
+              <Link className="hover:underline" to="/" onClick={logout}>Logout</Link>
+            </>
+          ) : (
+            <>
+              <Link className="hover:underline" to="/login">Login</Link>
+              <Link className="hover:underline" to="/signup">Signup</Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

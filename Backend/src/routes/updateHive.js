@@ -10,7 +10,6 @@ const fetchAndUpdateHives = async () => {
     for (const farm of farms) {
       const { thingspeakApiKey } = farm;
 
-      // Fetch last 100 feeds from ThingSpeak
       const url = `https://api.thingspeak.com/channels/3126283/feeds.json?api_key=${thingspeakApiKey}&results=100`;
       console.log(`Fetching data from: ${url}`);
       const res = await axios.get(url);
