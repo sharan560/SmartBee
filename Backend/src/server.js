@@ -1,5 +1,28 @@
-const express = require('express');
+// Diagnostic: log resolution of express and its internal router to help debug
+const fs = require('fs');
+const path = require('path');
 const dotenv = require('dotenv');
+try {
+	const expressMain = require.resolve('express');
+	const expressDir = path.dirname(expressMain);
+	const expressLib = path.join(expressDir, 'lib');
+	console.log('Resolved express main ->', expressMain);
+	console.log('Express lib directory ->', expressLib);
+	try {
+		const files = fs.readdirSync(expressLib);
+		console.log('Express lib contents:', files);
+	} catch (err) {
+		console.warn('Could not read express lib directory:', err.message);
+	}
+	try {
+		console.log('Resolved express/router ->', require.resolve('express/lib/router'));
+	} catch (err) {
+		console.warn('Could not resolve express/lib/router:', err.message);
+	}
+} catch (err) {
+	console.warn('Express resolution diagnostics failed:', err.message);
+}
+
 const connectDB = require('./config/db');
 const cors = require('cors');
 const fetchAndUpdateHives = require('./routes/updateHive');

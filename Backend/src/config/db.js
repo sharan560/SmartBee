@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
+const config = require('./default');
 
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/smartbee';
+  const uri = process.env.MONGO_URI || config.mongoUri || 'mongodb://localhost:27017/smartbee';
   try {
     console.log('Connecting to MongoDB at', uri);
     const conn = await mongoose.connect(uri, {
