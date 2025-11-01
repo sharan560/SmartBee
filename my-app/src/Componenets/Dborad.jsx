@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import { motion } from "framer-motion";
 import axios from "axios";
 
-const API_KEY = "8e88a178b6f8d7c81283a7bf200969fa";
+
 
 const weatherFor = (key) => {
   const k = (key || "").toLowerCase();
@@ -12,6 +12,7 @@ const weatherFor = (key) => {
   if (/clear/.test(k)) return { icon: "☀️", text: "Clear" };
   return { icon: "🌤️", text: "Sunny" };
 };
+
 
 const Dborad = () => {
   const [hives, setHives] = useState([]);
@@ -24,7 +25,14 @@ const Dborad = () => {
     climate: "Sunny",
   });
   const [time, setTime] = useState(new Date());
+  const [lastWeatherUpdated, setLastWeatherUpdated] = useState(null);
   const farmId = localStorage.getItem("farmId");
+  
+  const OPENWEATHER_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
+  const THINGSPEAK_KEY = import.meta.env.VITE_THINGSPEAK_KEY;
+
+  // console.log("Using ThingSpeak Key:", THINGSPEAK_KEY);
+  console.log("Using OpenWeather Key:", OPENWEATHER_KEY);
 
   // 🔹 Update clock every second
   useEffect(() => {
@@ -32,28 +40,51 @@ const Dborad = () => {
     return () => clearInterval(t);
   }, []);
 
-  // 🔹 Fetch weather once
-  const fetchWeather = async () => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(async (pos) => {
+const fetchWeather = async () => {
+  if (!OPENWEATHER_KEY) {
+    console.warn("VITE_OPENWEATHER_KEY is not set. Weather fetch skipped.");
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    console.error("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
       const { latitude: lat, longitude: lon } = pos.coords;
       try {
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=8e88a178b6f8d7c81283a7bf200969fa`
         );
         const data = await res.json();
+
+        if (res.status !== 200 || data.cod !== 200) {
+          console.error("Weather API Error:", data);
+          return;
+        }
+
         setWeather({
           temp: Math.round(data.main.temp),
           humidity: data.main.humidity,
           pressure: data.main.pressure,
           wind: Math.round(data.wind?.speed || 0),
-          climate: data.weather[0].main,
+          climate: data.weather?.[0]?.main || "Unknown",
         });
+        setLastWeatherUpdated(new Date());
       } catch (err) {
         console.error("Error fetching weather:", err);
       }
-    });
-  };
+    },
+    (error) => {
+      console.error("Geolocation error:", error);
+      // keep UI friendly but don't spam alerts repeatedly
+      // alert("Please enable location permission to fetch weather details.");
+    },
+    { enableHighAccuracy: true, maximumAge: 60000, timeout: 10000 }
+  );
+};
 
   // 🔹 Send API key to backend
   const sendApiKey = async (farmId, apiKey) => {
@@ -74,7 +105,7 @@ const Dborad = () => {
   const fetchHives = async () => {
     try {
       const res = await fetch(
-        `https://api.thingspeak.com/channels/3126283/feeds.json?api_key=C4SNIR7EP4W21360&results=1`
+        `https://api.thingspeak.com/channels/3126283/feeds.json?api_key=${THINGSPEAK_KEY}&results=1`
       );
       const data = await res.json();
 
@@ -104,12 +135,18 @@ const Dborad = () => {
     }
   };
 
-  // 🔹 Initial + every 1 minute update
+ 
   useEffect(() => {
     fetchWeather();
     fetchHives();
-    const id = setInterval(fetchHives, 60000); // 🔁 every 1 min
-    return () => clearInterval(id);
+
+    const hivesInterval = setInterval(fetchHives, 60000); // every 1 min
+    const weatherInterval = setInterval(fetchWeather, 300000); // every 5 min
+
+    return () => {
+      clearInterval(hivesInterval);
+      clearInterval(weatherInterval);
+    };
   }, []);
 
   // 🔹 Calculate overall hive health
@@ -181,7 +218,7 @@ const Dborad = () => {
     <div className="min-h-screen" style={{ backgroundColor: "#689f38" }}>
       <Navbar />
       <main className="mt-20 max-w-7xl mx-auto px-6 py-8 text-[#f0f4c3]">
-        {/* HEADER */}
+    
         <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
           <div>
             <h1 className="text-4xl font-bold text-[#f0f4c3]">Hive Dashboard 🐝</h1>
@@ -225,6 +262,8 @@ const Dborad = () => {
               </div>
               <div className="text-sm text-gray-600">{time.toLocaleTimeString()}</div>
             </div>
+
+            <div className="mt-2 text-xs text-gray-600">{lastWeatherUpdated ? `Updated: ${lastWeatherUpdated.toLocaleTimeString()}` : "No recent update"}</div>
 
             <div className="mt-4 grid grid-cols-3 gap-2 text-center">
               <div className="p-2 bg-[#dcedc8] rounded-lg">

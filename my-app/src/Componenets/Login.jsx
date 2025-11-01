@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Navbar from './Navbar'
-import honey from '../assets/honey.jpg'
+import honey from '../assets/Honey.jpg'
 import axios from 'axios'
 
 const mockSignIn = (email, password) => {
