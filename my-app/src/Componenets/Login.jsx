@@ -34,14 +34,14 @@ const Login = () => {
 
   setLoading(true)
   try {
-    const res = await axios.post('http://localhost:5000/api/auth/login', {
+    const res = await axios.post('https://smartbee-backend.onrender.com/api/auth/login', {
       email,
       password,
     })
 
-    // Save user info in localStorage
     localStorage.setItem('user', JSON.stringify(res.data.user))
-    console.log(res.data)
+    localStorage.setItem('farmId', res.data.user.farmId)
+    console.log('res.data:', res.data.user)
     navigate('/dashboard')
   } catch (err) {
     if (err.response && err.response.data) {

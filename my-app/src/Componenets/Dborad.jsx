@@ -27,6 +27,7 @@ const Dborad = () => {
   const [time, setTime] = useState(new Date());
   const [lastWeatherUpdated, setLastWeatherUpdated] = useState(null);
   const farmId = localStorage.getItem("farmId");
+  console.log("Farm ID in Dashboard:", farmId);
   
   const OPENWEATHER_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
   const THINGSPEAK_KEY = import.meta.env.VITE_THINGSPEAK_KEY;;
@@ -83,21 +84,31 @@ const fetchWeather = async () => {
 };
 
   // 🔹 Send API key to backend
-  const sendApiKey = async (farmId, apiKey) => {
-    try {
-      const res = await axios.post("http://localhost:5000/api/saveKey", {
-        farmId,
-        apiKey,
-      });
-      alert("API key saved successfully!");
-      console.log(res.data);
-    } catch (err) {
-      console.error(err);
-      alert("Error saving API key");
-    }
-  };
+ const sendApiKey = async (farmId, apiKey) => {
 
-  // 🔹 Fetch hive data from ThingSpeak
+    farmId = localStorage.getItem("farmId");
+  if (!farmId || !apiKey) {
+    alert("farmId or apiKey is missing!");
+    return;
+  }
+  
+
+  try {
+    const res = await axios.post("https://smartbee-backend.onrender.com/api/saveKey", {
+      
+      farmId: Number(farmId), 
+      apiKey
+   
+    });
+    alert("API key saved successfully!");
+    console.log(res.data);
+  } catch (err) {
+    console.error(err.response?.data || err);
+    alert("Error saving API key");
+  }
+};
+
+  
   const fetchHives = async () => {
     try {
       const res = await fetch(
@@ -177,7 +188,7 @@ const fetchWeather = async () => {
     setHives((prev) => [...prev, newHive]);
   };
 
-  // 🔹 Gauge Component
+ 
   const Gauge = ({ value = 0, size = 140, stroke = 12 }) => {
     const radius = (size - stroke) / 2;
     const circumference = 2 * Math.PI * radius;

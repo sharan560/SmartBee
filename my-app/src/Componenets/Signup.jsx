@@ -35,12 +35,14 @@ const Signup = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/auth/signup', 
+        'https://smartbee-backend.onrender.com/api/auth/signup', 
         form
       )
       console.log(response.data) 
       localStorage.setItem('user', JSON.stringify(response.data))
-      localStorage.setItem('farmId', response.data.farmId)
+      localStorage.setItem('farmId', response.data.user.farmId)
+      console.log(response.data.user.farmId)
+      console.log('Signup successful')
       navigate('/dashboard') 
     } catch (err) {
       console.error(err)
