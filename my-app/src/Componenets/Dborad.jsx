@@ -29,12 +29,8 @@ const Dborad = () => {
   const farmId = localStorage.getItem("farmId");
   
   const OPENWEATHER_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
-  const THINGSPEAK_KEY = import.meta.env.VITE_THINGSPEAK_KEY;
+  const THINGSPEAK_KEY = import.meta.env.VITE_THINGSPEAK_KEY;;
 
-  // console.log("Using ThingSpeak Key:", THINGSPEAK_KEY);
-  console.log("Using OpenWeather Key:", OPENWEATHER_KEY);
-
-  // 🔹 Update clock every second
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
@@ -140,7 +136,7 @@ const fetchWeather = async () => {
     fetchWeather();
     fetchHives();
 
-    const hivesInterval = setInterval(fetchHives, 60000); // every 1 min
+    const hivesInterval = setInterval(fetchHives, 20000); // every 20 sec
     const weatherInterval = setInterval(fetchWeather, 300000); // every 5 min
 
     return () => {
@@ -343,7 +339,9 @@ const fetchWeather = async () => {
                   <div className="text-sm text-[#33691e] space-y-1 mb-3">
                     <div>Humidity: {h.humidity}%</div>
                     <div>pH: {h.ph}</div>
-                    <div>Weight: {h.weight} kg</div>
+                    <div>
+                      Weight:0.{Number.isFinite(h.weight) ? Math.round(Math.abs(h.weight)) : 0} kg
+                    </div>
                     {!h.live && (
                       <div className="text-red-600 text-xs font-semibold">
                         Device Offline (no update &gt;1 min)
@@ -352,7 +350,7 @@ const fetchWeather = async () => {
                   </div>
 
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    <button
+                    {/* <button
                       onClick={() => toggleHeater(h.id)}
                       className={`px-3 py-1 rounded-full text-sm font-semibold transition ${
                         heaters[h.id]
@@ -361,7 +359,7 @@ const fetchWeather = async () => {
                       }`}
                     >
                       {heaters[h.id] ? "Heater ON" : "Turn On Heater"}
-                    </button>
+                    </button> */}
                     <button className="text-sm text-[#558b2f] hover:underline font-medium">
                       Details
                     </button>
