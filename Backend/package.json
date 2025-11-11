@@ -19,6 +19,5 @@
     "mongoose": "^7.5.0"
   },
   "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "license": "ISC"
 }
