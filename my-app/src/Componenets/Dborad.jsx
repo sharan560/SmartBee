@@ -177,7 +177,7 @@ const fetchWeather = async () => {
     console.log("Toggling heater for hive ID:", id);
     const currentState = heaters[id] ? "off" : "on";
     try {
-      await axios.post(`http://localhost:5000/api/led`, {
+      await axios.post(`https://smartbee-backend.onrender.com/api/led`, {
         state: currentState,
         farmId: Number(farmId),
       });
