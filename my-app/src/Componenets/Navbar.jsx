@@ -1,17 +1,34 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const loggedIn = !!localStorage.getItem('user')
+
   const logout = () => {
-    localStorage.removeItem('user');
-    window.location.href = '/';
+    localStorage.removeItem('user')
+    window.location.href = '/'
   }
-  const loggedIn = !!localStorage.getItem('user');
+
+  const goToContact = () => {
+    if (location.pathname !== '/') {
+      navigate('/')
+      setTimeout(() => {
+        const el = document.getElementById('contact')
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    } else {
+      const el = document.getElementById('contact')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <header>
       <div
         style={{ backgroundColor: '#f0f4c3' }}
-        className="flex justify-between items-center fixed top-3 right-0 left-0 z-50 px-6  py-2 ml-64 mr-64 rounded-full shadow-md h-16 "
+        className="flex justify-between items-center fixed top-3 right-0 left-0 z-50 px-6 py-2 ml-64 mr-64 rounded-full shadow-md h-16 "
       >
         <div className="flex items-center gap-2 text-3xl font-semibold p-6" style={{ color: '#33691e', fontFamily: 'Roboto' }}>
           <svg
@@ -46,7 +63,7 @@ const Navbar = () => {
         </div>
         <nav style={{ color: '#33691e' }} className="flex space-x-4 gap-5 font-semibold p-6 " aria-label="Main navigation">
           <Link className="hover:underline" to="/">Home</Link>
-          <Link className="hover:underline" to="/contact">Contact</Link>
+          <button onClick={goToContact} className="hover:underline bg-transparent border-none cursor-pointer">Contact</button>
           
           {loggedIn ? (
             <>

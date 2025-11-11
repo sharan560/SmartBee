@@ -5,6 +5,7 @@ import Home from './Componenets/Home'
 import Login from './Componenets/Login'
 import Signup from './Componenets/Signup'
 import Dashboard from './Componenets/Dborad'
+import Errorpage from './Componenets/Errorpage'
 
 const App = () => {
   return (
@@ -15,7 +16,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path='*' element={<h1>404 - Not Found</h1>} />
+          <Route path='*' element={<Errorpage />} />
         </Routes>
       </BrowserRouter>
     </div>

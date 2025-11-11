@@ -126,8 +126,8 @@ const Home = () => {
 
         <div className="flex flex-col items-center justify-center h-full">
             <p className="text-gray-700 text-center max-w-md">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorem, pariatur! Consequuntur, vel numquam. Quia illum totam earum aspernatur quaerat illo, dolorum libero sequi autem fuga labore soluta porro odio non iusto nesciunt facere temporibus, sit nulla quas ab quos nisi veritatis. Quas, dolore! Culpa possimus, est minus atque temporibus qui!
-            </p>
+              Hi! I’m Sharan N, the creator of Smart Bee. Passionate about bringing new ideas to life, One of my  build solutions that make farming smarter and simpler. Smart Bee helps monitor hive data seamlessly, giving insights to optimize beekeeping and enhance productivity. I love turning data into actionable insights and creating tools that make life easier.
+              </p>
 
             <div className="flex gap-4 justify-center mt-4">
             <a href="https://github.com/sharan560" aria-label="GitHub"><img src={github}  alt="GitHub" className="w-10 h-10" /></a>
@@ -137,7 +137,7 @@ const Home = () => {
         </motion.div>
         </motion.div>
 
-        <footer className="w-full bg-[#2e7d32] text-[#f0f4c3] mt-12">
+        <footer id="contact" className="w-full bg-[#2e7d32] text-[#f0f4c3] mt-12">
           <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h4 className="text-lg font-semibold mb-2">SmartBee</h4>
