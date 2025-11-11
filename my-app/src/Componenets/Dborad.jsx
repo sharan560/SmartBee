@@ -172,8 +172,20 @@ const fetchWeather = async () => {
 
   const gaugeColor = urgency > 60 ? "bg-red-500" : urgency > 30 ? "bg-yellow-400" : "bg-green-500";
 
-  const toggleHeater = (id) => {
-    setHeaters((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleHeater = async (id) => {
+
+    console.log("Toggling heater for hive ID:", id);
+    const currentState = heaters[id] ? "off" : "on";
+    try {
+      await axios.post(`http://localhost:5000/api/led`, {
+        state: currentState,
+        farmId: Number(farmId),
+      });
+      setHeaters((prev) => ({ ...prev, [id]: !prev[id] }));
+    } catch (err) {
+      console.error("Error toggling heater:", err);
+      alert("Failed to toggle heater. Check backend connection.");
+    }
   };
 
   const addHive = () => {
@@ -361,7 +373,7 @@ const fetchWeather = async () => {
                   </div>
 
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    {/* <button
+                    <button
                       onClick={() => toggleHeater(h.id)}
                       className={`px-3 py-1 rounded-full text-sm font-semibold transition ${
                         heaters[h.id]
@@ -370,7 +382,7 @@ const fetchWeather = async () => {
                       }`}
                     >
                       {heaters[h.id] ? "Heater ON" : "Turn On Heater"}
-                    </button> */}
+                    </button>
                     <button className="text-sm text-[#558b2f] hover:underline font-medium">
                       Details
                     </button>
