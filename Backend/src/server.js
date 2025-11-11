@@ -1,56 +1,37 @@
-const fs = require('fs');
-const path = require('path');
-const dotenv = require('dotenv');
 const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
 
-try {
-	const expressMain = require.resolve('express');
-	const expressDir = path.dirname(expressMain);
-	const expressLib = path.join(expressDir, 'lib');
-	console.log('Resolved express main ->', expressMain);
-	console.log('Express lib directory ->', expressLib);
-	try {
-		const files = fs.readdirSync(expressLib);
-		console.log('Express lib contents:', files);
-	} catch (err) {
-		console.warn('Could not read express lib directory:', err.message);
-	}
-	try {
-		console.log('Resolved express/router ->', require.resolve('express/lib/router'));
-	} catch (err) {
-		console.warn('Could not resolve express/lib/router:', err.message);
-	}
-} catch (err) {
-	console.warn('Express resolution diagnostics failed:', err.message);
-}
+const authRoutes = require("./routes/auth");
+const thingSpeakRoutes = require("./routes/hivedata");
+const saveKeyRoutes = require("./routes/savekey");
+const fetchAndUpdateHives = require("./routes/updateHive");
 
-const connectDB = require('./config/db');
-const cors = require('cors');
-const fetchAndUpdateHives = require('./routes/updateHive');
-
-const authRoutes = require('./routes/auth');
-const thingSpeakRoutes = require('./routes/hivedata'); 
-const saveKeyRoutes = require('./routes/savekey');
-    
+// Load environment variables
 dotenv.config();
 
+// Initialize express app
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// Connect Database
+// Connect to MongoDB
 connectDB();
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/thingspeak', thingSpeakRoutes);
-app.use('/api', saveKeyRoutes); 
+app.use("/api/auth", authRoutes);
+app.use("/api/thingspeak", thingSpeakRoutes);
+app.use("/api", saveKeyRoutes);
 
+// Hive updater (runs every 30 seconds)
 fetchAndUpdateHives();
 setInterval(fetchAndUpdateHives, 30 * 1000);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
