@@ -9,7 +9,7 @@
   "postinstall": "node -e \"try{require('child_process').execSync('npm rebuild --update-binary',{stdio:'inherit'});}catch(e){console.warn('postinstall: rebuild failed, continuing');}\""
   },
   "engines": {
-    "node": ">=18 <23"
+    "node": "20.x"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

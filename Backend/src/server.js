@@ -1,7 +1,8 @@
-// Diagnostic: log resolution of express and its internal router to help debug
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const express = require("express");
+
 try {
 	const expressMain = require.resolve('express');
 	const expressDir = path.dirname(expressMain);
@@ -27,11 +28,10 @@ const connectDB = require('./config/db');
 const cors = require('cors');
 const fetchAndUpdateHives = require('./routes/updateHive');
 
-// Routes
 const authRoutes = require('./routes/auth');
 const thingSpeakRoutes = require('./routes/hivedata'); 
 const saveKeyRoutes = require('./routes/savekey');
-
+    
 dotenv.config();
 
 const app = express();

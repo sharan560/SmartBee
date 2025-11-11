@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const config = require('./default');
+// const config = require('./default');
 
 const connectDB = async () => {
   const uri = process.env.MONGO_URI || config.mongoUri || 'mongodb://localhost:27017/smartbee';
